@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | BAZARBD</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      font-family: 'Hind Siliguri', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 p-4">
+
+  <h1 class="text-3xl font-bold mb-4">Checkout</h1>
+
+  <!-- Billing -->
+  <div class="bg-white p-4 rounded shadow mb-4">
+    <h2 class="text-xl font-bold mb-2">Billing Details</h2>
+
+    <input id="name" placeholder="আপনার নাম" class="border p-2 w-full mb-2 rounded">
+    <input id="phone" placeholder="মোবাইল নাম্বার" class="border p-2 w-full mb-2 rounded">
+    <input id="address" placeholder="ঠিকানা" class="border p-2 w-full mb-2 rounded">
+
+    <select id="payment" class="border p-2 w-full rounded">
+      <option>Cash on Delivery</option>
+      <option>bKash</option>
+      <option>Nagad</option>
+    </select>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="bg-white p-4 rounded shadow">
+    <h2 class="text-xl font-bold mb-2">Order Summary</h2>
+
+    <div id="cart-items" class="mb-2"></div>
+
+    <p class="font-bold">Total: <span id="total">৳ 0</span></p>
+
+    <button onclick="placeOrder()" class="w-full mt-3 bg-orange-600 text-white py-2 rounded">
+      Place Order
+    </button>
+
+    <a href="orders.html" class="block mt-3 text-center bg-green-600 text-white py-2 rounded">
+      View Orders
+    </a>
+  </div>
+
+  <!-- Script -->
+  <script>
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    function loadCart() {
+      let container = document.getElementById('cart-items');
+      let total = 0;
+
+      container.innerHTML = '';
+
+      if (cart.length === 0) {
+        container.innerHTML = "<p class='text-red-500'>কার্ট খালি</p>";
+        return;
+      }
+
+      cart.forEach(item => {
+        total += item.price;
+        container.innerHTML += `<p>${item.name} - ৳ ${item.price}</p>`;
+      });
+
+      document.getElementById('total').innerText = "৳ " + total;
+    }
+
+    function placeOrder() {
+      let name = document.getElementById('name').value;
+      let phone = document.getElementById('phone').value;
+      let address = document.getElementById('address').value;
+      let payment = document.getElementById('payment').value;
+
+      if (!name || !phone || !address) {
+        alert("সব তথ্য পূরণ করুন!");
+        return;
+      }
+
+      let total = 0;
+      let productList = "";
+
+      cart.forEach(item => {
+        total += item.price;
+        productList += `- ${item.name} (৳${item.price})\n`;
+      });
+
+      let messageText =
+`🛒 New Order!
+
+👤 Name: ${name}
+📞 Phone: ${phone}
+📍 Address: ${address}
+💳 Payment: ${payment}
+
+📦 Products:
+${productList}
+
+💰 Total: ৳${total}`;
+
+      let whatsappNumber = "8801603906503";
+
+      let url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageText)}`;
+
+      window.open(url, '_blank');
+
+      // Save Order
+      let orders = JSON.parse(localStorage.getItem('orders')) || [];
+      orders.push({ name, phone, address, payment, total });
+      localStorage.setItem('orders', JSON.stringify(orders));
+
+      // Clear cart
+      localStorage.removeItem('cart');
+
+      alert("✅ Order Confirmed!");
+      location.reload();
+    }
+
+    loadCart();
+  </script>
+
+</body>
+</html>
